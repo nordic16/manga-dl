@@ -31,13 +31,20 @@ func start() {
 
 					spinner.Stop()
 
-					val, _ := pterm.DefaultInteractiveTextInput.Show("Select index: ")
+					val, _ := pterm.DefaultInteractiveTextInput.Show("Select manga: ")
 					index, _ := strconv.Atoi(val)
 
-					url := fmt.Sprintf("https://mangareader.to%s", getUrl(mangas[index-1]))
+					manga_id := mangas[index-1].Find("a").Attrs()["href"]
 
-					fmt.Println(url)
+					url := fmt.Sprintf("https://mangareader.to%s", manga_id)
+					chapters := totalChapters(url)
 
+					pterm.Println("\nFound " + pterm.LightGreen(chapters) + " chapters!\n")
+					val, _ = pterm.DefaultInteractiveTextInput.Show("Select chapter: ")
+					index, _ = strconv.Atoi(val)
+
+					// Final url
+					pterm.Printfln("https://mangareader.to/read%s/en/chapter-%d", manga_id, index)
 					return nil
 				},
 			},

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/anaskhan96/soup"
 	"github.com/pterm/pterm"
@@ -38,7 +39,22 @@ func listMangas(mangas []soup.Root) {
 	}
 }
 
-/* Returns url */
-func getUrl(manga soup.Root) string {
-	return manga.Find("a").Attrs()["href"]
+/*
+	 Scrapes the number of chapters. Due to the nature of mangareader.to, only the number of chapters is required
+		in order to form an url for a given chapter.
+		Structure: mangareader.to/read/<manga-id>/en/chapter-<num>
+*/
+func totalChapters(manga_url string) int {
+	resp, err := soup.Get(manga_url)
+
+	if err != nil {
+		os.Exit(-1)
+	}
+
+	doc := soup.HTMLParse(resp)
+	latestChapterNum := doc.Find("ul", "id", "en-chapters").Find("li", "class", "reading-item").Attrs()["data-number"]
+	num, _ := strconv.Atoi(latestChapterNum)
+
+	return num
+
 }
