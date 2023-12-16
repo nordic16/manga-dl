@@ -14,6 +14,7 @@ import (
 
 /* Contains a bunch of useful functions to handle cli commands. */
 
+// TODO: split this code into (maybe) a few functions to make it better.
 func start() {
 	app := &cli.App{
 		Name:  "manga-dl",
@@ -24,6 +25,8 @@ func start() {
 				Usage: "searches for a given manga",
 				Action: func(cCtx *cli.Context) error {
 					var manga string = cCtx.Args().First()
+					spinner, _ := pterm.DefaultSpinner.Start()
+
 					resp, err := soup.Get("https://mangareader.to/search?keyword=" + manga)
 
 					if err != nil {
@@ -43,6 +46,8 @@ func start() {
 							TextStyle: pterm.NewStyle(pterm.FgYellow)}
 					}
 
+					spinner.Stop()
+
 					pterm.DefaultSection.Print("Results")
 					pterm.DefaultBulletList.WithItems(items).Render()
 
@@ -50,9 +55,9 @@ func start() {
 					val, _ := pterm.DefaultInteractiveTextInput.Show("Select index: ")
 					index, _ := strconv.Atoi(val)
 
-					test := doc.FindAll("a", items[index-1].Text[6:]) //todo: figure out why this doesn't work
+					url := fmt.Sprintf("https://mangareader.to%s", mangas[index-1].Find("a").Attrs()["href"])
 
-					fmt.Print(test)
+					fmt.Println(url)
 
 					return nil
 				},
