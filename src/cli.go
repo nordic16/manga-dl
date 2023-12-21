@@ -32,19 +32,38 @@ func start() {
 					spinner.Stop()
 
 					val, _ := pterm.DefaultInteractiveTextInput.Show("Select manga: ")
-					index, _ := strconv.Atoi(val)
+					index, e := strconv.Atoi(val)
 
-					manga_id := mangas[index-1].Find("a").Attrs()["href"]
+					if e != nil {
+						pterm.Error.Printf("Invalid index!\n")
+						os.Exit(-1)
+					}
 
-					url := fmt.Sprintf("https://mangareader.to%s", manga_id)
-					chapters := totalChapters(url)
+					manga_id := mangas[index-1].Attrs()["href"]
 
-					pterm.Println("\nFound " + pterm.LightGreen(chapters) + " chapters!\n")
+					// spinner, _ = pterm.DefaultSpinner.Start()
+					url := fmt.Sprintf("https://mangapill.com%s", manga_id)
+
+					chapters := scrapeChapters(url)
+					// spinner.Stop()
+					pterm.Info.Printfln("Found %d chapters!", len(chapters))
+
 					val, _ = pterm.DefaultInteractiveTextInput.Show("Select chapter: ")
-					index, _ = strconv.Atoi(val)
+					// Chapter order is reversed.
+					index, e = strconv.Atoi(val)
 
-					// Final url
-					pterm.Printfln("https://mangareader.to/read%s/en/chapter-%d", manga_id, index)
+					if e != nil {
+						pterm.Error.Printf("Invalid index!\n")
+						os.Exit(-1)
+					}
+
+					// Chapters' orders are reversed.
+					pos := len(chapters) - index
+					url = fmt.Sprintf("https://mangapill.com%s", chapters[pos])
+					images := scrapeImages(url)
+
+					downloadImages(images)
+
 					return nil
 				},
 			},
