@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/anaskhan96/soup"
@@ -88,27 +89,36 @@ func scrapeImages(chapter_url string) []string {
 }
 
 /* Obvious lmfao */
-func downloadImages(images []string) {
+func downloadImages(images []string) []string {
+	pathToImages := make([]string, len(images))
 	client := &http.Client{}
+	defer client.CloseIdleConnections()
+	dir, _ := os.MkdirTemp("", "tmp")
 
 	for i, imageUrl := range images {
 		req, _ := http.NewRequest("GET", imageUrl, nil)
 		req.Header.Set("Referer", "https://mangapill.com")
-		img, e := client.Do(req)
 
-		name := fmt.Sprintf("img-%d.jpeg", i)
+		img, e := client.Do(req)
+		buf, _ := io.ReadAll(img.Body) // The actual raw data
 
 		if e != nil {
 			pterm.Error.Println("Something went wrong downloading the images!")
 			os.Exit(-1)
 		}
 
-		buf, _ := io.ReadAll(img.Body)
-		os.WriteFile(name, buf, 0666)
+		// Code kinda sucks but, hey, it works!
+		name := fmt.Sprintf("img-%d.jpeg", i+1)
+		f, _ := os.CreateTemp(dir, name)
+
+		f.Write(buf)
+		pathToImages[i] = path.Join(dir, name)
 
 		if e != nil {
 			fmt.Println(e)
 			os.Exit(-1)
 		}
 	}
+
+	return images
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 
 	"strconv"
 
@@ -15,6 +16,9 @@ import (
 
 // TODO: split this code into (maybe) a few functions to make it better.
 func start() {
+	// needs to be implemented.
+	// defer clean_up()
+
 	app := &cli.App{
 		Name:  "manga-dl",
 		Usage: "Epic terminal manga reader lmfao",
@@ -63,7 +67,8 @@ func start() {
 					images := scrapeImages(url)
 
 					downloadImages(images)
-
+					// TODO: allow user to choose between terminal or some other program.
+					start_event_loop(images, true)
 					return nil
 				},
 			},
@@ -73,4 +78,12 @@ func start() {
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
+}
+
+/* Allows the user to read manga. */
+func start_event_loop(images []string, terminal bool) {
+	// Will work on Linux and MacOS. Windows users shouldn't even be using this lmfao.
+	exec.Command("clear")
+	pterm.Info.Println("NOTE: For now, kitty is the only supported terminal.")
+
 }
