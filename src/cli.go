@@ -17,7 +17,6 @@ import (
 // TODO: split this code into (maybe) a few functions to make it better.
 func start() {
 	// needs to be implemented.
-	// defer clean_up()
 
 	app := &cli.App{
 		Name:  "manga-dl",
@@ -64,9 +63,9 @@ func start() {
 					// Chapters' orders are reversed.
 					pos := len(chapters) - index
 					url = fmt.Sprintf("https://mangapill.com%s", chapters[pos])
-					images := scrapeImages(url)
+					imageUrls := scrapeImages(url)
 
-					downloadImages(images)
+					images := downloadImages(imageUrls)
 					// TODO: allow user to choose between terminal or some other program.
 					start_event_loop(images, true)
 					return nil
@@ -81,9 +80,21 @@ func start() {
 }
 
 /* Allows the user to read manga. */
+// todo: fix lmao
 func start_event_loop(images []string, terminal bool) {
+	defer cleanUp()
+
 	// Will work on Linux and MacOS. Windows users shouldn't even be using this lmfao.
-	exec.Command("clear")
 	pterm.Info.Println("NOTE: For now, kitty is the only supported terminal.")
 
+	_, e := exec.LookPath("kitty")
+
+	if e != nil {
+		pterm.Error.Print("Kitty is either not installed or not on $PATH.")
+	}
+}
+
+/* Deletes temporary files */
+func cleanUp() {
+	exec.Command("/bin/sh", "-c", "rm -rf /tmp/manga-tmp*").Run()
 }

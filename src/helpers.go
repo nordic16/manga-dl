@@ -93,7 +93,7 @@ func downloadImages(images []string) []string {
 	pathToImages := make([]string, len(images))
 	client := &http.Client{}
 	defer client.CloseIdleConnections()
-	dir, _ := os.MkdirTemp("", "tmp")
+	dir, _ := os.MkdirTemp("", "manga-tmp")
 
 	for i, imageUrl := range images {
 		req, _ := http.NewRequest("GET", imageUrl, nil)
@@ -120,5 +120,5 @@ func downloadImages(images []string) []string {
 		}
 	}
 
-	return images
+	return pathToImages
 }
