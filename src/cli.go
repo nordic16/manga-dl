@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 
 	"strconv"
 
@@ -67,7 +68,7 @@ func start() {
 
 					images := downloadImages(imageUrls)
 					// TODO: allow user to choose between terminal or some other program.
-					start_event_loop(images, true)
+					start_event_loop(images, false)
 					return nil
 				},
 			},
@@ -82,7 +83,7 @@ func start() {
 /* Allows the user to read manga. */
 // todo: fix lmao
 func start_event_loop(images []string, terminal bool) {
-	defer cleanUp()
+	//defer cleanUp()
 
 	// Will work on Linux and MacOS. Windows users shouldn't even be using this lmfao.
 	pterm.Info.Println("NOTE: For now, kitty is the only supported terminal.")
@@ -92,6 +93,12 @@ func start_event_loop(images []string, terminal bool) {
 	if e != nil {
 		pterm.Error.Print("Kitty is either not installed or not on $PATH.")
 	}
+
+	fPath := createCbzFile(path.Dir(images[0]))
+	e = exec.Command("xdg-open", fPath).Run()
+
+	fmt.Println(e)
+
 }
 
 /* Deletes temporary files */

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 
@@ -88,7 +89,7 @@ func scrapeImages(chapter_url string) []string {
 	return urls
 }
 
-/* Obvious lmfao */
+/* Downloads images */
 func downloadImages(images []string) []string {
 	pathToImages := make([]string, len(images))
 	client := &http.Client{}
@@ -107,12 +108,20 @@ func downloadImages(images []string) []string {
 			os.Exit(-1)
 		}
 
-		// Code kinda sucks but, hey, it works!
-		name := fmt.Sprintf("img-%d.jpeg", i+1)
-		f, _ := os.CreateTemp(dir, name)
+		name := ""
+
+		// to get it to work with cbz.
+		if i < 9 {
+			name = fmt.Sprintf("img-0%d.jpeg", i+1)
+
+		} else {
+			name = fmt.Sprintf("img-%d.jpeg", i+1)
+		}
+
+		f, _ := os.Create(path.Join(dir, name))
 
 		f.Write(buf)
-		pathToImages[i] = path.Join(dir, name)
+		pathToImages[i] = f.Name()
 
 		if e != nil {
 			fmt.Println(e)
@@ -121,4 +130,24 @@ func downloadImages(images []string) []string {
 	}
 
 	return pathToImages
+}
+
+func createCbzFile(dir string) string {
+	fPath := "/tmp/comic.cbz"
+
+	_, e := exec.LookPath("7z")
+
+	if e != nil {
+		pterm.Error.Println("Looks like 7z isn't installed... Install it and try again!")
+	}
+
+	cmd := fmt.Sprintf("7z a %s %s/*", fPath, dir)
+	exec.Command("/bin/sh", "-c", cmd).Run()
+
+	return fPath
+}
+
+// runes
+func split(r rune) bool {
+	return r == '-' || r == '.'
 }
