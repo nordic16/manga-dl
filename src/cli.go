@@ -83,7 +83,7 @@ func start() {
 /* Allows the user to read manga. */
 // todo: fix lmao
 func start_event_loop(images []string, terminal bool) {
-	//defer cleanUp()
+	defer cleanUp()
 
 	// Will work on Linux and MacOS. Windows users shouldn't even be using this lmfao.
 	pterm.Info.Println("NOTE: For now, kitty is the only supported terminal.")
